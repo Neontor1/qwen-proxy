@@ -59,7 +59,7 @@ class LogStore {
     } as RequestLogEntry;
     const cfg = configService.get();
     this.buffer.push(full);
-    const cap = Math.max(50, cfg.LOG_BUFFER_SIZE || 500);
+    const cap = Math.max(100, cfg.LOG_BUFFER_SIZE || 2000);
     if (this.buffer.length > cap) this.buffer.splice(0, this.buffer.length - cap);
     this.totalLogged++;
 

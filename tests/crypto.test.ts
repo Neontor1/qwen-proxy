@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest/globals';
 import { decryptSecret, encryptSecret, isEncrypted, safeEqual } from '../src/utils/crypto.js';
 
 describe('crypto', () => {

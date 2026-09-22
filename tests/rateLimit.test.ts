@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'vitest/globals';
 import { mkdtempSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
