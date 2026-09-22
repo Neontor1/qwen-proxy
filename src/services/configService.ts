@@ -16,10 +16,17 @@ const boolStr = z
   .transform((v) => (typeof v === 'boolean' ? v : ['1', 'true', 'yes', 'on'].includes(v.toLowerCase())));
 const numLike = z
   .union([z.number(), z.string()])
-  .transform((v) => (typeof v === 'number' ? v : Number.parseInt(v, 10) || 0));
+  .transform((v) => {
+    if (typeof v === 'number') return v;
+    const parsed = Number.parseInt(v, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  });
 
 export const ConfigSchema = z.object({
-  PORT: z.union([z.number(), z.string()]).transform((v) => Number(v) || 26405),
+  PORT: z.union([z.number(), z.string()]).transform((v) => {
+    const parsed = Number(v);
+    return Number.isNaN(parsed) ? 26405 : parsed;
+  }),
   HOST: z.string().default('0.0.0.0'),
   /** When the configured port is busy / OS-excluded, pick the next free one. */
   PORT_AUTO_FALLBACK: boolStr.default(true),

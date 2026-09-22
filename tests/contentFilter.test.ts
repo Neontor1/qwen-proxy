@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest/globals';
 import { createContentFilter, filterContent } from '../src/services/contentFilter.js';
 import { ThinkTagStripper } from '../src/utils/thinkTagStripper.js';
 import { XmlStripper } from '../src/utils/xmlStripper.js';

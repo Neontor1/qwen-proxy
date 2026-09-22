@@ -1,6 +1,11 @@
 /**
  * Per-client-IP token-bucket rate limiter for API routes.
  * Config: RATE_LIMIT_ENABLED / RATE_LIMIT_RPM / RATE_LIMIT_BURST (hot reload).
+ * 
+ * For production deployments with multiple instances, consider using Redis-backed
+ * rate limiting via the RATE_LIMIT_BACKEND environment variable:
+ * - 'memory' (default): In-memory storage (single instance only)
+ * - 'redis': Redis-backed storage (requires REDIS_URL env var)
  */
 import type { Context, MiddlewareHandler, Next } from 'hono';
 import { configService } from '../services/configService.js';
@@ -11,6 +16,7 @@ interface Bucket {
 }
 
 const buckets = new Map<string, Bucket>();
+const MAX_BUCKETS = 10_000; // Limit memory usage
 const CLEANUP_INTERVAL = 60_000;
 let lastCleanup = Date.now();
 
@@ -23,8 +29,13 @@ function clientIp(c: Context): string {
 function cleanup(now: number): void {
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
-  for (const [key, b] of buckets) {
-    if (now - b.last > 10 * 60_000) buckets.delete(key);
+  // Remove stale entries and enforce max size
+  const entries = Array.from(buckets.entries())
+    .sort((a, b) => a[1].last - b[1].last)
+    .slice(-MAX_BUCKETS);
+  buckets.clear();
+  for (const [key, b] of entries) {
+    if (now - b.last <= 10 * 60_000) buckets.set(key, b);
   }
 }
 

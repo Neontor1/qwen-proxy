@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM"],
-    "types": ["bun"],
+    "types": ["node", "bun"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "strict": true,

@@ -14,11 +14,13 @@
     "start:node": "tsx src/cli.ts start",
     "dev": "bun --watch run src/cli.ts start",
     "dev:node": "tsx watch src/cli.ts start",
-    "test": "bash scripts/test.sh",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:bun": "bash scripts/test.sh",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test:file": "bun test",
     "smoke": "bun scripts/smoke.ts"
   },
   "engines": {
@@ -34,8 +36,9 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "^1.4.2",
-    "@types/node": "^20.17.0",
+    "@types/node": "^20.19.43",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.11"
   }
 }
