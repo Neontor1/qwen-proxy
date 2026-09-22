@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest/globals';
+import { describe, expect, it } from 'vitest';
 import {
   StreamingToolParser,
   extractToolCalls,

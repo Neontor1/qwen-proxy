@@ -2,7 +2,7 @@
  * This test file requires Bun runtime (Bun.serve) and is excluded from Node.js test runs.
  * Run with: bun test tests/realProvider.test.ts
  */
-import { afterAll, describe, expect, it } from 'vitest/globals';
+import { afterAll, describe, expect, it } from 'vitest';
 import type { QwenSession } from '../src/services/qwen.js';
 
 // Check if running in Bun - skip if not
