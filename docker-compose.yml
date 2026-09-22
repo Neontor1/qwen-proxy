@@ -1,0 +1,24 @@
+services:
+  qwen-proxy:
+    build:
+      context: .
+      args:
+        WITH_BROWSER: "0" # set "1" to bake Playwright chromium into the image
+    image: qwen-proxy-gateway:latest
+    container_name: qwen-proxy
+    restart: unless-stopped
+    ports:
+      - "26405:26405"
+    environment:
+      # PROVIDER: auto | real | mock
+      PROVIDER: auto
+      # MASTER_KEY: set to protect the dashboard (empty = auto-generated in the volume)
+      MASTER_KEY: ""
+      # API_KEY: bearer token for /v1 (empty = open)
+      API_KEY: ""
+      LOG_LEVEL: info
+    volumes:
+      - qwen-data:/app/data
+
+volumes:
+  qwen-data:

@@ -1,0 +1,13 @@
+#!/bin/sh
+# qg symlink entry (installed to /usr/local/bin by install.sh)
+DIR="$(cd "$(dirname "$0")" && pwd)"
+REAL="$DIR"
+# resolve through symlinks one level (installer symlinks here)
+if [ -L "$0" ]; then
+  TARGET="$(readlink "$0")"
+  case "$TARGET" in
+    /*) REAL="$(dirname "$TARGET")" ;;
+    *) REAL="$(dirname "$DIR/$TARGET")" ;;
+  esac
+fi
+exec node "$REAL/qg.js" "$@"

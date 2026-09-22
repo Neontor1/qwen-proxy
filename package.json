@@ -1,0 +1,41 @@
+{
+  "name": "qwen-proxy-gateway",
+  "version": "1.0.0",
+  "description": "Self-hosted OpenAI-compatible proxy gateway for Qwen (chat.qwen.ai) with multi-account rotation, streaming, tool calling and a web dashboard",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "qg": "./bin/qg.js",
+    "qwen-proxy": "./bin/qg.js"
+  },
+  "main": "src/index.tsx",
+  "scripts": {
+    "start": "bun run src/cli.ts start",
+    "start:node": "tsx src/cli.ts start",
+    "dev": "bun --watch run src/cli.ts start",
+    "dev:node": "tsx watch src/cli.ts start",
+    "test": "bash scripts/test.sh",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test:file": "bun test",
+    "smoke": "bun scripts/smoke.ts"
+  },
+  "engines": {
+    "node": ">=20",
+    "bun": ">=1.1"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.7.0",
+    "playwright-core": "^1.50.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^20.17.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

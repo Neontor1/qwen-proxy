@@ -1,0 +1,12 @@
+node_modules
+data
+logs
+*.log
+config.json
+accounts.json
+sessions.json
+master.key
+.git
+docs
+tests
+.ms-playwright

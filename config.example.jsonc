@@ -1,0 +1,59 @@
+// Qwen Proxy Gateway — example configuration
+// Copy to config.json and adjust. Every value can also be set via environment
+// variables (same names, e.g. PORT=8080, API_KEY=sk-xxx, MOCK_MODE=true).
+{
+  // ── Server ──────────────────────────────────────────────────────────────
+  "PORT": "26405",                // HTTP port (any free port; also --port N / $env:PORT)
+  "HOST": "0.0.0.0",              // Bind address
+  // port busy or excluded by Windows (Hyper-V)? the gateway hops to the next free one
+  "PORT_AUTO_FALLBACK": true,
+  "API_KEY": "",                  // Bearer token for /v1 API ("" = auth disabled)
+  "MASTER_KEY": "",               // Key for dashboard & account management ("" = auto-generated on first start)
+
+  // ── Provider ────────────────────────────────────────────────────────────
+  // auto  → real provider when accounts exist, mock provider otherwise (great for demos/tests)
+  // real  → always talk to chat.qwen.ai
+  // mock  → always use the built-in simulator (no network, no accounts needed)
+  "PROVIDER": "auto",
+  "QWEN_BASE_URL": "https://chat.qwen.ai",
+  "BROWSER": "chromium",          // chromium | firefox | webkit | chrome | edge (Playwright engine for login fallback)
+  "SESSION_POOL_SIZE": 5,         // browser/auth sessions kept warm per pool
+  // mock mode seeds a throwaway in-memory account (demo@mock.dev) so the whole
+  // pipeline works with zero configured accounts; it is never written to disk
+  "MOCK_DEMO_ACCOUNT": true,
+
+  // ── Chat behaviour ──────────────────────────────────────────────────────
+  "TOOL_CALLING": true,           // parse tool calls out of Qwen text → OpenAI tool_calls
+  "CLEAN_OUTPUT": true,           // strip <think> tags and XML artifacts
+  "STREAMING_MODE": "auto",       // auto | on | off  (auto = follow client "stream" flag)
+  // false → unknown model ids fall back to the default model (advertised via the
+  // X-Model-Routed-From / X-Model-Resolved response headers)
+  // true  → unknown model ids are rejected with 400 + the list of known models
+  "STRICT_MODELS": false,
+  "RATE_LIMIT_COOLDOWN_MS": 120000, // account cooldown after a rate-limit error (2 min)
+  "RETRY_MAX_ATTEMPTS": 3,        // retries across accounts on failure
+  "HEARTBEAT_INTERVAL_MS": 15000, // SSE keep-alive comment interval
+  "STREAM_IDLE_TIMEOUT_MS": 120000, // close a stream after this much silence
+  "MAX_ACCOUNT_ERRORS": 5,        // consecutive errors before an account is auto-disabled
+
+  // ── Rate limiting (per client IP, token bucket) ─────────────────────────
+  "RATE_LIMIT_ENABLED": true,
+  "RATE_LIMIT_RPM": 60,            // requests per minute per IP
+  "RATE_LIMIT_BURST": 20,          // bucket burst size
+
+  // ── Logging & monitoring ────────────────────────────────────────────────
+  "SAVE_REQUEST_LOGS": false,      // persist request logs to logs/requests.jsonl
+  "LOG_LEVEL": "info",             // debug | info | warn | error
+  "NETWORK_DEBUG": false,          // capture outbound calls to chat.qwen.ai for the Network page
+  "LOG_BUFFER_SIZE": 500,          // in-memory request log ring buffer size
+
+  // ── Misc ────────────────────────────────────────────────────────────────
+  "OPEN_DASHBOARD_ON_START": false,
+  "WORKERS": 1,                    // >1 starts a cluster of worker processes
+  "PUBLIC_URL": "",                // used in generated setup commands (default: http://<host>:<port>)
+
+  // Seed accounts (copied into accounts.json on first start; passwords get encrypted)
+  "ACCOUNTS": [
+    // { "email": "user@example.com", "password": "secret" }
+  ]
+}

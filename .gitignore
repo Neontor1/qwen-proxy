@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Runtime data & secrets — never commit
+config.json
+accounts.json
+sessions.json
+master.key
+data/
+logs/
+*.log
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+coverage/
+
+# Playwright browsers (installed separately)
+.ms-playwright/
