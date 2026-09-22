@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest/globals';
+import { describe, expect, it } from 'vitest';
 import { decodeJwt, jwtExpiresInMs, maskEmail, maskSecret } from '../src/utils/ids.js';
 import { retry } from '../src/utils/retry.js';
 import { SseParser, sseFormat } from '../src/utils/streaming.js';

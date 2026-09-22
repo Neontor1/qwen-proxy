@@ -1,39 +1,45 @@
-import { afterAll, describe, expect, it } from 'vitest/globals';
+import { afterAll, describe, expect, it } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { createServer } from 'node:http';
 
 const HOME = mkdtempSync(path.join(os.tmpdir(), 'qg-capture-'));
 process.env.QWEN_PROXY_HOME = HOME;
 process.env.PROVIDER = 'mock';
 process.env.RATE_LIMIT_ENABLED = 'false';
 
-// ── stub "chat.qwen.ai" ────────────────────────────────────────────────────
-const stub = Bun.serve({
-  port: 0,
-  fetch(req) {
-    const url = new URL(req.url);
-    if (url.pathname === '/api/v1/auths/signin') {
-      return new Response(JSON.stringify({ data: { token: 'stub-jwt', email: 'stub@qwen.ai' } }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Set-Cookie': 'token=stub-jwt; Path=/; Domain=chat.qwen.ai; Secure, cna=stub-cna; Path=/',
-        },
-      });
-    }
-    if (url.pathname === '/api/v2/models') {
-      return new Response(JSON.stringify({ data: [{ id: 'qwen3.8-max' }] }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    return new Response(
-      '<html><head></head><body><script>fetch("/api/v2/models");fetch("https://chat.qwen.ai/api/v2/x")</script></body></html>',
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
-    );
-  },
+// ── stub "chat.qwen.ai" using Node.js http server ────────────────────────────
+let stubPort = 0;
+const stubServer = createServer((req, res) => {
+  const url = new URL(req.url || '', `http://localhost:${stubPort}`);
+  if (url.pathname === '/api/v1/auths/signin' && req.method === 'POST') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Set-Cookie': 'token=stub-jwt; Path=/; Domain=chat.qwen.ai, cna=stub-cna; Path=/',
+    });
+    res.end(JSON.stringify({ data: { token: 'stub-jwt', email: 'stub@qwen.ai' } }));
+    return;
+  }
+  if (url.pathname === '/api/v2/models') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ data: [{ id: 'qwen3.8-max' }] }));
+    return;
+  }
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end('<html><head></head><body><script>fetch("/api/v2/models");fetch("https://chat.qwen.ai/api/v2/x")</script></body></html>');
 });
-process.env.QWEN_BASE_URL = `http://127.0.0.1:${stub.port}`;
-afterAll(() => stub.stop(true));
+
+await new Promise<void>((resolve) => {
+  stubServer.listen(0, () => {
+    const address = stubServer.address();
+    stubPort = typeof address === 'string' ? parseInt(address.split(':').pop() || '0') : address?.port || 0;
+    resolve();
+  });
+});
+
+process.env.QWEN_BASE_URL = `http://127.0.0.1:${stubPort}`;
+afterAll(() => stubServer.close());
 
 const { buildApp } = await import('../src/app.js');
 const { accountManager } = await import('../src/services/accountManager.js');

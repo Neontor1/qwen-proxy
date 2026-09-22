@@ -1,9 +1,9 @@
-import { randomBytes } from 'node:crypto';
 /**
  * Config service — loads config.json (creating it from defaults on first run),
  * overlays environment variables, validates with Zod, supports live updates
  * from the dashboard (hot reload) and emits change events.
  */
+import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { z } from 'zod';
 import { createLogger } from '../utils/logger.js';
@@ -14,13 +14,22 @@ const log = createLogger('config');
 const boolStr = z
   .union([z.boolean(), z.string()])
   .transform((v) => (typeof v === 'boolean' ? v : ['1', 'true', 'yes', 'on'].includes(v.toLowerCase())));
-const numLike = z
-  .union([z.number(), z.string()])
-  .transform((v) => {
-    if (typeof v === 'number') return v;
-    const parsed = Number.parseInt(v, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  });
+
+/**
+ * Parse a string to number with strict validation.
+ * Returns null if parsing fails, allowing explicit error handling.
+ */
+function parseNumberStrict(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isNaN(v) ? null : v;
+  if (typeof v !== 'string') return null;
+  const parsed = Number.parseInt(v, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+const numLike = z.union([z.number(), z.string()]).transform((v) => {
+  const parsed = parseNumberStrict(v);
+  return parsed ?? 0;
+});
 
 export const ConfigSchema = z.object({
   PORT: z.union([z.number(), z.string()]).transform((v) => {
@@ -30,14 +39,16 @@ export const ConfigSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
   /** When the configured port is busy / OS-excluded, pick the next free one. */
   PORT_AUTO_FALLBACK: boolStr.default(true),
-  API_KEY: z.string().default(''),
+  API_KEY: z.string().default('dev-key-no-auth'),
   MASTER_KEY: z.string().default(''),
 
   PROVIDER: z.enum(['auto', 'real', 'mock']).default('auto'),
   QWEN_BASE_URL: z.string().default('https://chat.qwen.ai'),
   BROWSER: z.enum(['chromium', 'firefox', 'webkit', 'chrome', 'edge']).default('chromium'),
   BROWSER_LOGIN: boolStr.default(false),
-  SESSION_POOL_SIZE: numLike.default(5),
+  SESSION_POOL_SIZE: numLike.default(5).refine((v) => v >= 1 && v <= 50, {
+    message: 'SESSION_POOL_SIZE must be between 1 and 50',
+  }),
 
   TOOL_CALLING: boolStr.default(true),
   CLEAN_OUTPUT: boolStr.default(true),
@@ -64,7 +75,9 @@ export const ConfigSchema = z.object({
   SAVE_REQUEST_LOGS: boolStr.default(false),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   NETWORK_DEBUG: boolStr.default(false),
-  LOG_BUFFER_SIZE: numLike.default(500),
+  LOG_BUFFER_SIZE: numLike.default(2000).refine((v) => v >= 100 && v <= 50000, {
+    message: 'LOG_BUFFER_SIZE must be between 100 and 50000',
+  }),
 
   OPEN_DASHBOARD_ON_START: boolStr.default(false),
   WORKERS: numLike.default(1),

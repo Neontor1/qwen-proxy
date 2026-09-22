@@ -13,7 +13,7 @@ export function cors(): MiddlewareHandler {
     const origin = c.req.header('origin');
     
     // Support configurable allowed origins
-    const allowedOriginsStr = process.env.CORS_ALLOWED_ORIGINS || cfg.HOST === '0.0.0.0' ? '*' : `http://${cfg.HOST}:${cfg.PORT}`;
+    const allowedOriginsStr = process.env.CORS_ALLOWED_ORIGINS || (cfg.HOST === '0.0.0.0' ? '*' : `http://${cfg.HOST}:${cfg.PORT}`);
     const allowedOrigins = allowedOriginsStr.split(',').map((o) => o.trim());
     
     // If specific origins are configured, validate the request origin
@@ -33,9 +33,9 @@ export function cors(): MiddlewareHandler {
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Master-Key, X-Api-Key');
     c.header('Access-Control-Max-Age', '86400');
     
-    // Allow credentials if explicitly enabled
+    // Allow credentials only when explicitly enabled AND origin is not wildcard
     const allowCredentials = process.env.CORS_CREDENTIALS?.toLowerCase() === 'true';
-    if (allowCredentials && responseOrigin !== '*') {
+    if (allowCredentials && responseOrigin !== '*' && responseOrigin !== '') {
       c.header('Access-Control-Allow-Credentials', 'true');
     }
     

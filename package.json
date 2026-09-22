@@ -14,7 +14,8 @@
     "start:node": "tsx src/cli.ts start",
     "dev": "bun --watch run src/cli.ts start",
     "dev:node": "tsx watch src/cli.ts start",
-    "build": "tsc",
+    "build": "tsc && node scripts/build-bundle.mjs",
+    "build:check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:bun": "bash scripts/test.sh",
@@ -37,6 +38,7 @@
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "^1.4.2",
     "@types/node": "^20.19.43",
+    "esbuild": "^0.25.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^4.1.11"

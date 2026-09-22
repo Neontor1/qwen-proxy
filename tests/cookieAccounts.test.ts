@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest/globals';
+import { describe, expect, it } from 'vitest';
 import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
